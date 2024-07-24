@@ -18,8 +18,9 @@ public interface Scoreboard {
      * @param homeTeamName the name of the home team
      * @param awayTeamName the name of the away team
      * @return the newly started game
+     * @throws IllegalArgumentException if either team name is blank
      */
-    GameDto startGame(final String homeTeamName, final String awayTeamName);
+    GameDto startGame(final String homeTeamName, final String awayTeamName) throws IllegalArgumentException;
 
     /**
      * Updates the score of an ongoing game.

@@ -62,4 +62,35 @@ class ValidationUtilsTest {
         assertThrows(IllegalArgumentException.class, () -> ValidationUtils.requireNonNegative(Integer.MIN_VALUE));
     }
 
+    @Test
+    @DisplayName("Test requireNonBlank with all non-blank strings")
+    void testRequireNonBlankWithAllNonBlank() {
+        assertDoesNotThrow(() -> ValidationUtils.requireNonBlank("Test", "Test2", "Test3"));
+    }
+
+    @Test
+    @DisplayName("Test requireNonBlank with one empty string")
+    void testRequireNonBlankWithOneEmpty() {
+        assertThrows(IllegalArgumentException.class, () -> ValidationUtils.requireNonBlank("Test", "Test2", ""));
+    }
+
+    @Test
+    @DisplayName("Test requireNonBlank with one newline string")
+    void testRequireNonBlankWithOneNewline() {
+        assertThrows(IllegalArgumentException.class, () -> ValidationUtils.requireNonBlank("Test", "Test2", "\n"));
+    }
+
+
+    @Test
+    @DisplayName("Test requireNonBlank with one null string")
+    void testRequireNonBlankWithOneNull() {
+        assertThrows(IllegalArgumentException.class, () -> ValidationUtils.requireNonBlank("Test", "Test2", null));
+    }
+
+    @Test
+    @DisplayName("Test requireNonBlank with multiple empty and null strings")
+    void testRequireNonBlankWithMultipleEmptyAndNull() {
+        assertThrows(IllegalArgumentException.class, () -> ValidationUtils.requireNonBlank("   ", "\n", "", "Test", null, "Test2", "", null));
+    }
+
 }
