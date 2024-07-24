@@ -2,7 +2,9 @@ package org.example.scoreboard;
 
 
 import org.example.scoreboard.exception.GameNotFoundException;
+import org.example.scoreboard.model.domain.Game;
 import org.example.scoreboard.model.dto.GameDto;
+import org.example.scoreboard.model.dto.request.ScoreUpdate;
 import org.example.scoreboard.repository.GameRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -84,6 +86,45 @@ class DefaultScoreboardTest {
 
         verify(gameRepository, times(1)).existsById(gameId);
         verify(gameRepository, times(0)).deleteById(gameId);
+    }
+
+    @Test
+    @DisplayName("Test updateGame should update a game")
+    void testUpdateGameShouldUpdateGame() {
+        final var gameId = UUID.randomUUID();
+        final var scoreUpdate = new ScoreUpdate(1, 2);
+        final var game = Game.from("Home", "Away");
+        when(gameRepository.findByIdOrThrow(gameId)).thenReturn(game);
+
+        final var result = underTest.updateGame(gameId, scoreUpdate);
+
+        assertEquals(1, result.homeTeam().score().value());
+        assertEquals(2, result.awayTeam().score().value());
+
+        verify(gameRepository, times(1)).findByIdOrThrow(gameId);
+    }
+
+    @Test
+    @DisplayName("Test updateGame should throw GameNotFoundException when game does not exist")
+    void testUpdateGameShouldThrowGameNotFoundExceptionWhenGameDoesNotExist() {
+        final var gameId = UUID.randomUUID();
+        final var scoreUpdate = new ScoreUpdate(1, 2);
+        when(gameRepository.findByIdOrThrow(gameId)).thenThrow(new GameNotFoundException("Game with ID = {} not found", gameId));
+
+        assertThrows(GameNotFoundException.class, () -> underTest.updateGame(gameId, scoreUpdate));
+
+        verify(gameRepository, times(1)).findByIdOrThrow(gameId);
+    }
+
+    @Test
+    @DisplayName("Test updateGame should throw IllegalArgumentException when score update is null")
+    void testUpdateGameShouldThrowIllegalArgumentExceptionWhenScoreUpdateIsNull() {
+        final var gameId = UUID.randomUUID();
+        when(gameRepository.findByIdOrThrow(gameId)).thenReturn(Game.from("Home", "Away"));
+
+        assertThrows(IllegalArgumentException.class, () -> underTest.updateGame(gameId, null));
+
+        verify(gameRepository, times(1)).findByIdOrThrow(gameId);
     }
 
 }

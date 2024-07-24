@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.example.scoreboard.model.dto.request.ScoreUpdate;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -29,5 +30,14 @@ public class Game {
                 Team.from(awayTeamName),
                 OffsetDateTime.now()
         );
+    }
+
+
+    public void updateScore(final ScoreUpdate scoreUpdate) {
+        if (scoreUpdate == null) {
+            throw new IllegalArgumentException("Score update must not be null");
+        }
+        homeTeam.setScore(scoreUpdate.homeTeamScore());
+        awayTeam.setScore(scoreUpdate.awayTeamScore());
     }
 }

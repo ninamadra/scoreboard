@@ -33,7 +33,9 @@ public class DefaultScoreboard implements Scoreboard {
 
     @Override
     public GameDto updateGame(final UUID gameId, final ScoreUpdate scoreUpdate) throws GameNotFoundException, IllegalArgumentException {
-        throw new UnsupportedOperationException("Not implemented yet");
+        final Game game = gameRepository.findByIdOrThrow(gameId);
+        game.updateScore(scoreUpdate);
+        return GameMapper.toDto(game);
     }
 
 

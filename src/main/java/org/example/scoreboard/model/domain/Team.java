@@ -20,4 +20,8 @@ public class Team {
         ValidationUtils.requireNonBlank(name);
         return new Team(name);
     }
+
+    public void setScore(final int value) {
+        this.score = new Score(value);
+    }
 }
