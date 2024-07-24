@@ -12,9 +12,7 @@ public record TeamDto(
         Score score
 ) {
     public TeamDto {
-        ValidationUtils.requireNonNull(name, score);
-        if (name.isBlank()) {
-            throw new IllegalArgumentException("Name must not be blank");
-        }
+        ValidationUtils.requireNonBlank(name);
+        ValidationUtils.requireNonNull(score);
     }
 }
