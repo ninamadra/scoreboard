@@ -1,6 +1,7 @@
 package org.example.scoreboard;
 
 
+import org.example.scoreboard.exception.GameNotFoundException;
 import org.example.scoreboard.model.dto.GameDto;
 import org.example.scoreboard.repository.GameRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -10,12 +11,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultScoreboardTest {
@@ -28,8 +32,8 @@ class DefaultScoreboardTest {
 
 
     @Test
-    @DisplayName("Should start a game")
-    void shouldStartGame() {
+    @DisplayName("Test startGame should start a game")
+    void testStartGameShouldStartGame() {
         final String homeTeamName = "Home";
         final String awayTeamName = "Away";
 
@@ -46,15 +50,40 @@ class DefaultScoreboardTest {
     }
 
     @Test
-    @DisplayName("Should throw IllegalArgumentException when team name is empty string")
-    void shouldThrowIllegalArgumentExceptionWhenHomeTeamNameIsEmpty() {
+    @DisplayName("Test startGame should throw IllegalArgumentException when team name is empty string")
+    void testStartGameShouldThrowIllegalArgumentExceptionWhenHomeTeamNameIsEmpty() {
         assertThrows(IllegalArgumentException.class, () -> underTest.startGame("", "Away"));
     }
 
     @Test
-    @DisplayName("Should throw IllegalArgumentException when team name is null")
-    void shouldThrowIllegalArgumentExceptionWhenHomeTeamNameIsNull() {
+    @DisplayName("Test startGame should throw IllegalArgumentException when team name is null")
+    void testStartGameShouldThrowIllegalArgumentExceptionWhenHomeTeamNameIsNull() {
        assertThrows(IllegalArgumentException.class, () -> underTest.startGame("Home", null));
+    }
+
+    @Test
+    @DisplayName("Test finishGame should delete a game by ID")
+    void testFinishGameShouldDeleteGameById() {
+        final var gameId = UUID.randomUUID();
+        when(gameRepository.existsById(gameId)).thenReturn(true);
+        doNothing().when(gameRepository).deleteById(gameId);
+
+        underTest.finishGame(gameId);
+
+        verify(gameRepository, times(1)).existsById(gameId);
+        verify(gameRepository, times(1)).deleteById(gameId);
+    }
+
+    @Test
+    @DisplayName("Test finishGame should throw GameNotFoundException when game does not exist")
+    void testFinishGameShouldThrowGameNotFoundExceptionWhenGameDoesNotExist() {
+        final var gameId = UUID.randomUUID();
+        when(gameRepository.existsById(gameId)).thenReturn(false);
+
+        assertThrows(GameNotFoundException.class, () -> underTest.finishGame(gameId));
+
+        verify(gameRepository, times(1)).existsById(gameId);
+        verify(gameRepository, times(0)).deleteById(gameId);
     }
 
 }

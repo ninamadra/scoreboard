@@ -10,6 +10,9 @@ import org.example.scoreboard.repository.GameRepository;
 
 import java.util.UUID;
 
+/**
+ * Default implementation of the {@link Scoreboard} interface.
+ */
 public class DefaultScoreboard implements Scoreboard {
 
     private final GameRepository gameRepository;
@@ -36,7 +39,11 @@ public class DefaultScoreboard implements Scoreboard {
 
     @Override
     public void finishGame(final UUID gameId) throws GameNotFoundException {
-        throw new UnsupportedOperationException("Not implemented yet");
+        final boolean exists = gameRepository.existsById(gameId);
+        if (!exists) {
+            throw new GameNotFoundException("Game with ID = {} not found", gameId);
+        }
+        gameRepository.deleteById(gameId);
     }
 
 
