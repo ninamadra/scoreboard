@@ -34,8 +34,8 @@ public class Game {
 
 
     public void updateScore(final ScoreUpdate scoreUpdate) {
-        if (scoreUpdate == null) {
-            throw new IllegalArgumentException("Score update must not be null");
+        if (scoreUpdate == null || scoreUpdate.homeTeamScore() == null || scoreUpdate.awayTeamScore() == null) {
+            throw new IllegalArgumentException("Score update and scores must not be null");
         }
         homeTeam.setScore(scoreUpdate.homeTeamScore());
         awayTeam.setScore(scoreUpdate.awayTeamScore());
