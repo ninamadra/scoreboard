@@ -31,4 +31,18 @@ public class ValidationUtils {
             }
         }
     }
+
+    /**
+     * Ensures that all provided strings are not blank.
+     *
+     * @param strings the strings to be validated as non-blank.
+     * @throws IllegalArgumentException if any string is blank.
+     */
+    public static void requireNonBlank(final String... strings) {
+        for (final String str : strings) {
+            if (str == null || str.isBlank()) {
+                throw new IllegalArgumentException("One or more arguments are blank");
+            }
+        }
+    }
 }
