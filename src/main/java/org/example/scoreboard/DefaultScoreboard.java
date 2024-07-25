@@ -36,6 +36,7 @@ public class DefaultScoreboard implements Scoreboard {
     public GameDto updateGame(final UUID gameId, final ScoreUpdate scoreUpdate) throws GameNotFoundException, IllegalArgumentException {
         final Game game = gameRepository.findByIdOrThrow(gameId);
         game.updateScore(scoreUpdate);
+        gameRepository.save(game);
         return GameMapper.toDto(game);
     }
 

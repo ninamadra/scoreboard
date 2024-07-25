@@ -40,4 +40,8 @@ public class Game {
         homeTeam.setScore(scoreUpdate.homeTeamScore());
         awayTeam.setScore(scoreUpdate.awayTeamScore());
     }
+
+    public int getTotalScore() {
+        return homeTeam.getScore().value() + awayTeam.getScore().value();
+    }
 }
