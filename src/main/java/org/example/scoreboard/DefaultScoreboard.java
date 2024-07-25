@@ -8,6 +8,7 @@ import org.example.scoreboard.model.dto.GamesSummary;
 import org.example.scoreboard.model.dto.request.ScoreUpdate;
 import org.example.scoreboard.repository.GameRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -51,6 +52,10 @@ public class DefaultScoreboard implements Scoreboard {
 
     @Override
     public GamesSummary getOngoingGames() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        final List<GameDto> games = gameRepository.getAllOrderedByTotalScoreAndStartTime()
+                .sequential()
+                .map(GameMapper::toDto)
+                .toList();
+        return new GamesSummary(games);
     }
 }

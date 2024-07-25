@@ -4,6 +4,7 @@ package org.example.scoreboard;
 import org.example.scoreboard.exception.GameNotFoundException;
 import org.example.scoreboard.model.domain.Game;
 import org.example.scoreboard.model.dto.GameDto;
+import org.example.scoreboard.model.dto.GamesSummary;
 import org.example.scoreboard.model.dto.request.ScoreUpdate;
 import org.example.scoreboard.repository.GameRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -13,9 +14,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -125,6 +129,71 @@ class DefaultScoreboardTest {
         assertThrows(IllegalArgumentException.class, () -> underTest.updateGame(gameId, null));
 
         verify(gameRepository, times(1)).findByIdOrThrow(gameId);
+    }
+
+    @Test
+    @DisplayName("Test getOngoingGames should return a summary of ongoing games")
+    void testGetOngoingGamesShouldReturnSummaryOfOngoingGames() {
+        final String homeTeamName = "Home1";
+        final String awayTeamName = "Away1";
+        final String homeTeamName2 = "Home2";
+        final String awayTeamName2 = "Away2";
+
+        final Game game = Game.from(homeTeamName, awayTeamName);
+        final Game game2 = Game.from(homeTeamName2, awayTeamName2);
+        when(gameRepository.getAllOrderedByTotalScoreAndStartTime())
+                .thenReturn(Stream.of(game, game2));
+
+        final GamesSummary result = underTest.getOngoingGames();
+        final List<GameDto> games = result.games();
+
+        assertEquals(2, games.size());
+        assertEquals(homeTeamName, games.getFirst().homeTeam().name());
+        assertEquals(awayTeamName, games.getFirst().awayTeam().name());
+        assertEquals(homeTeamName2, games.getLast().homeTeam().name());
+        assertEquals(awayTeamName2, games.getLast().awayTeam().name());
+
+        verify(gameRepository, times(1)).getAllOrderedByTotalScoreAndStartTime();
+    }
+
+    @Test
+    @DisplayName("Test getOngoingGames should return an empty list if there are no ongoing games")
+    void testGetOngoingGamesShouldReturnEmptyListIfNoOngoingGames() {
+        when(gameRepository.getAllOrderedByTotalScoreAndStartTime())
+                .thenReturn(Stream.empty());
+
+        final GamesSummary result = underTest.getOngoingGames();
+        final List<GameDto> games = result.games();
+
+        assertEquals(0, games.size());
+
+        verify(gameRepository, times(1)).getAllOrderedByTotalScoreAndStartTime();
+    }
+
+    @Test
+    @DisplayName("Test getOngoingGames should use a sequential stream")
+    void testGetOngoingGamesShouldUseSequentialStream() {
+        final String homeTeamName = "Home1";
+        final String awayTeamName = "Away1";
+        final String homeTeamName2 = "Home2";
+        final String awayTeamName2 = "Away2";
+
+        final Game game = Game.from(homeTeamName, awayTeamName);
+        final Game game2 = Game.from(homeTeamName2, awayTeamName2);
+        Stream<Game> gameStream = Stream.of(game, game2).parallel();
+        when(gameRepository.getAllOrderedByTotalScoreAndStartTime()).thenReturn(gameStream);
+
+        final var result = underTest.getOngoingGames();
+        final List<GameDto> games = result.games();
+
+        assertFalse(gameStream.isParallel(), "Stream should be sequential");
+        assertEquals(2, result.games().size());
+        assertEquals(homeTeamName, games.getFirst().homeTeam().name());
+        assertEquals(awayTeamName, games.getFirst().awayTeam().name());
+        assertEquals(homeTeamName2, games.getLast().homeTeam().name());
+        assertEquals(awayTeamName2, games.getLast().awayTeam().name());
+
+        verify(gameRepository, times(1)).getAllOrderedByTotalScoreAndStartTime();
     }
 
 }
